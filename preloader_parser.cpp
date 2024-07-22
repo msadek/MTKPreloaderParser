@@ -1,4 +1,5 @@
 #include "preloader_parser.h"
+#include <QRegularExpression>
 
 bool EMIParser::PrasePreloader(QIODevice &emi_dev, QVector<mtkPreloader::MTKEMIInfo> &emis)
 {
@@ -1010,17 +1011,19 @@ qstr EMIParser::GetEMIFlashDev(qbyte emi_buf)
         if (idx2 != -1)
         {
             qstr emi_dev = emi_buf.mid(idx2 + serach2.length(), sizeof(quint));
-            QRegExp regex0("67(\\d+)");
-            if (regex0.indexIn(emi_dev)!= -1)
+            static QRegularExpression regex0("67(\\d+)");
+            QRegularExpressionMatch regex0Match= regex0.match(emi_dev);
+            if (regex0Match.hasMatch()== true)
             {
-                qsizetype dev_id = regex0.cap(1).toInt();
+                qsizetype dev_id = regex0Match.captured(1).toInt();
                 emi_dev = qstr("MT67%0").arg(dev_id);
             }
 
-            QRegExp regex1("65(\\d+)");
-            if (regex1.indexIn(emi_dev)!= -1)
+            static QRegularExpression regex1("65(\\d+)");
+            QRegularExpressionMatch regex1Match= regex1.match(emi_dev);
+            if (regex1Match.hasMatch()== true)
             {
-                qsizetype dev_id = regex1.cap(1).toInt();
+                qsizetype dev_id = regex1Match.captured(1).toInt();
                 emi_dev = qstr("MT65%0").arg(dev_id);
             }
         }
@@ -1154,10 +1157,10 @@ void EMIParser::PraseCID(qbyte raw_cid, mmcCARD::CIDInfo &cid_info, bool ufs_id)
         memcpy(&_psn.psn[3], &m_cid.psn3, sizeof(_psn.psn[3]));
         QByteArray psn((char*)&_psn, sizeof(_psn));
 
-        QString prv_min(QString().sprintf("%d", (qchar)(m_cid.pdrv >> 4)));
-        QString prv_maj(QString().sprintf("%d", (qchar)(m_cid.pdrv & 0xf)));
-        QString mdt_month(QString().sprintf("%d", (qchar)(m_cid.mdt >> 4)));
-        QString mdt_year(QString().sprintf("%d", (qshort)(m_cid.mdt & 0xf) + 2013)); //todo
+        QString prv_min(QString().asprintf("%d", (qchar)(m_cid.pdrv >> 4)));
+        QString prv_maj(QString().asprintf("%d", (qchar)(m_cid.pdrv & 0xf)));
+        QString mdt_month(QString().asprintf("%d", (qchar)(m_cid.mdt >> 4)));
+        QString mdt_year(QString().asprintf("%d", (qshort)(m_cid.mdt & 0xf) + 2013)); //todo
 
         cid_info.ManufacturerId = get_hex(m_cid.mid);
         cid_info.Manufacturer = get_card_mfr_id(m_cid.mid);

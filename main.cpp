@@ -25,12 +25,14 @@ int main(int argc, char *argv[])
 
     while (1) {
 
-        QByteArray path(0xff, Qt::Uninitialized);
+        QByteArray path(0xff, 0x20);
         std::cin.get((char*)path.data(), 0xff);
-
+        path = path.trimmed();
+        path.truncate(path.size()-1);
         qInfo(".....................................................");
         qInfo().noquote() << QString("Reading emi file %0").arg(path.data());
-        QFile emi_dev(QDir::toNativeSeparators(path));
+        QFile emi_dev(QDir::fromNativeSeparators(path));
+
         if (!emi_dev.size())
         {
             qInfo().noquote() << QString("please input a valid file!.");
